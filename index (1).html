@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SSM Shop | Fresh Groceries, Great Prices</title>
+  <style>
+    :root {
+      --primary: #2e7d32;
+      --primary-dark: #0d631b;
+      --primary-deep: #126d27;
+      --primary-soft: #9cf49c;
+      --primary-text: #19722b;
+      --accent: #ffdcc2;
+      --accent-text: #834600;
+      --text: #1a1c1b;
+      --text-muted: #40493d;
+      --bg: #f9f9f6;
+      --surface: #ffffff;
+      --surface-alt: #eeeeeb;
+      --border: rgba(191, 202, 186, 0.3);
+      --shadow: 0 1px 3px 0 rgba(31,41,55,0.04), 0 6px 16px 0 rgba(46,125,50,0.05);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 72px;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; border: none; background: none; }
+    img, svg { display: block; max-width: 100%; }
+    .container { width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+    .icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+    /* ---------- Header ---------- */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(249,249,246,0.95);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+    }
+    .topbar-inner { height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 20px; color: var(--primary-dark); letter-spacing: -0.4px; }
+    .brand .icon { width: 20px; height: 20px; }
+    .left-cluster { display: flex; align-items: center; gap: 12px; }
+    .right-cluster { display: flex; align-items: center; gap: 6px; }
+    .icon-btn {
+      position: relative; width: 40px; height: 40px; border-radius: 9999px;
+      display: flex; align-items: center; justify-content: center; color: var(--text-muted);
+    }
+    .icon-btn:hover { background: var(--surface-alt); }
+    .cart-badge {
+      position: absolute; top: 2px; right: 2px; min-width: 20px; height: 20px; padding: 2px 6px;
+      border-radius: 9999px; background: #a65b00; color: #ffefe5; font-size: 11px; font-weight: 700;
+      border: 2px solid var(--bg); display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ---------- Drawer ---------- */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 60; }
+    .overlay.open { opacity: 1; pointer-events: auto; }
+    .drawer {
+      position: fixed; top: 0; left: 0; bottom: 0; width: 320px; max-width: 85vw;
+      background: var(--bg); border-right: 1px solid var(--border);
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+      transform: translateX(-100%); transition: transform .25s ease; z-index: 70;
+      display: flex; flex-direction: column; padding: 16px 17px;
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 17px; border-bottom: 1px solid var(--border); }
+    .drawer-head .brand { font-size: 24px; }
+    .drawer-links { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 16px 0; overflow: auto; }
+    .drawer-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 9999px; font-weight: 600; font-size: 15px; color: var(--text-muted); }
+    .drawer-link:hover, .drawer-link.active { background: var(--primary-soft); color: var(--primary-text); }
+    .drawer-foot { background: #f4f4f1; border: 1px solid var(--border); border-radius: 16px; padding: 17px 12px 12px; }
+    .drawer-foot p { font-size: 14px; color: var(--text-muted); }
+    .drawer-foot .open-now { font-size: 13px; font-weight: 600; color: var(--primary-dark); margin-bottom: 8px; display: flex; gap: 8px; align-items: center; }
+
+    /* ---------- Shared typography ---------- */
+    .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 0.65px; text-transform: uppercase; color: var(--primary-deep); }
+    .section-head { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; max-width: 672px; margin: 0 auto; }
+    .section-head h2 { font-size: 24px; line-height: 32px; font-weight: 600; letter-spacing: -0.36px; color: var(--text); }
+    .section-head p { font-size: 14px; color: var(--text-muted); }
+    .section { padding: 40px 0; }
+    .section + .section { padding-top: 0; }
+    .stack { display: flex; flex-direction: column; gap: 32px; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.44px; color: var(--text-muted); background: #eeeeeb;
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px 28px; border-radius: 9999px; font-size: 15px; font-weight: 600; letter-spacing: 0.15px;
+      transition: transform .15s, box-shadow .15s, background .15s; min-height: 48px;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-outline { background: var(--surface); color: var(--primary-dark); border: 1px solid rgba(191,202,186,0.8); }
+    .btn-accent { background: var(--accent); color: #2e1500; }
+    .btn-ghost { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.4); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+    }
+
+    /* ---------- Hero ---------- */
+    .hero { padding: 24px 0 32px; }
+    .hero-content { display: flex; flex-direction: column; gap: 16px; }
+    .trust-pill {
+      align-self: flex-start; display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 15px; border-radius: 9999px; background: rgba(156,244,156,0.5); border: 1px solid var(--primary-soft);
+      font-size: 11px; font-weight: 700; letter-spacing: 0.44px; color: var(--primary-text);
+    }
+    .hero h1 { font-size: 28px; line-height: 35px; font-weight: 700; letter-spacing: -0.7px; color: var(--text); }
+    .hero h1 span { color: var(--primary); display: block; }
+    .hero-text { font-size: 16px; line-height: 24px; color: var(--text-muted); max-width: 576px; }
+    .hero-buttons { display: flex; flex-wrap: wrap; gap: 12px; padding-top: 8px; }
+    .hero-buttons .btn { min-width: 176px; }
+    .micro-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding-top: 8px; }
+    .micro-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.44px; color: var(--primary-deep); }
+    .micro-badge .icon { width: 12px; height: 12px; color: var(--primary); }
+    .micro-sep { color: #bfcaba; font-size: 11px; }
+
+    .hero-media {
+      position: relative; margin-top: 16px; border-radius: 24px; overflow: hidden;
+      border: 1px solid rgba(191,202,186,0.4); box-shadow: var(--shadow);
+      height: 260px;
+      background: #efe3cc;
+    }
+    .hero-art { display: none; }
+    .hero-trad { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .hero-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.25), transparent 50%); }
+    .float-card {
+      position: absolute; z-index: 2; display: flex; align-items: center; gap: 10px;
+      padding: 11px 17px; border-radius: 16px; background: rgba(255,255,255,0.95);
+      border: 1px solid var(--border); box-shadow: var(--shadow); backdrop-filter: blur(6px);
+    }
+    .float-card .dot { width: 32px; height: 32px; border-radius: 9999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .float-card .label { font-size: 11px; font-weight: 700; letter-spacing: 0.44px; color: var(--text-muted); }
+    .float-card .value { font-size: 13px; font-weight: 600; letter-spacing: 0.26px; color: var(--text); }
+    .float-card.one { top: -10px; left: -8px; transform: rotate(-1deg); }
+    .float-card.one .dot { background: var(--primary-soft); color: var(--primary-text); }
+    .float-card.two { bottom: -16px; right: -8px; transform: rotate(2deg); }
+    .float-card.two .dot { background: var(--accent); color: var(--accent-text); }
+    .float-card.two .label { color: var(--accent-text); }
+
+    /* ---------- Categories ---------- */
+    .eyebrow-label { font-size: 13px; font-weight: 700; letter-spacing: 0.65px; text-transform: uppercase; color: var(--primary-deep); }
+    .category-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    .category {
+      padding: 17px; display: flex; flex-direction: column; gap: 16px; position: relative;
+    }
+    .category-icon {
+      width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+      background: var(--primary-soft); color: var(--primary-text);
+    }
+    .category-icon.peach { background: var(--accent); color: var(--accent-text); }
+    .category-icon.neutral { background: var(--surface-alt); color: var(--text-muted); }
+    .category .badge { align-self: flex-start; padding: 2px 8px; font-size: 11px; font-weight: 700; letter-spacing: 0.44px; color: var(--text-muted); background: var(--surface-alt); border-radius: 9999px; }
+    .category h3 { font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.2px; }
+    .category p { font-size: 14px; line-height: 20px; color: var(--text-muted); }
+    .category .explore { margin-top: auto; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; letter-spacing: 0.26px; color: var(--primary-dark); padding-top: 16px; }
+    .category .explore .icon { width: 10px; height: 10px; }
+
+    /* ---------- Why shop ---------- */
+    .feature-list { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .feature { padding: 21px; display: flex; flex-direction: column; gap: 12px; }
+    .feature-icon { width: 48px; height: 48px; border-radius: 12px; background: var(--primary-soft); color: var(--primary-text); display: flex; align-items: center; justify-content: center; }
+    .feature:nth-child(2) .feature-icon { background: var(--accent); color: var(--accent-text); }
+    .feature:nth-child(4) .feature-icon { background: #a3f69c; }
+    .feature h3 { font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.2px; }
+    .feature p { font-size: 14px; line-height: 20px; color: var(--text-muted); }
+
+    /* ---------- Achievements ---------- */
+    .achievement {
+      position: relative; overflow: hidden; background: var(--primary); color: #fff;
+      border-radius: 24px; padding: 24px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+      display: flex; flex-direction: column; gap: 32px;
+    }
+    .achievement::before, .achievement::after {
+      content: ""; position: absolute; width: 256px; height: 256px; border-radius: 9999px; filter: blur(32px); pointer-events: none;
+    }
+    .achievement::before { background: rgba(163,246,156,0.2); right: -96px; top: -96px; }
+    .achievement::after { background: rgba(255,220,194,0.2); left: -96px; bottom: -96px; }
+    .achievement > * { position: relative; z-index: 1; }
+    .achievement .section-head h2 { color: #fff; font-weight: 700; }
+    .achievement .section-head p { color: rgba(255,255,255,0.9); }
+    .achievement .pill { background: rgba(255,255,255,0.1); color: #cbffc2; }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .stat {
+      background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
+      padding: 17px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center; min-height: 110px;
+    }
+    .stat strong { font-size: 28px; line-height: 36px; font-weight: 800; letter-spacing: -0.7px; color: var(--accent); }
+    .stat span { font-size: 13px; font-weight: 600; letter-spacing: 0.26px; color: rgba(255,255,255,0.9); }
+
+    /* ---------- Testimonials ---------- */
+    .testimonials { display: flex; flex-direction: column; gap: 16px; }
+    .testimonial { padding: 21px; display: flex; flex-direction: column; justify-content: space-between; gap: 20px; }
+    .stars { display: flex; gap: 4px; color: #f5a300; }
+    .stars .icon { width: 15px; height: 15px; fill: currentColor; stroke: none; }
+    .quote { font-size: 16px; line-height: 24px; font-style: italic; color: var(--text); }
+    .author { display: flex; align-items: center; gap: 12px; padding-top: 17px; border-top: 1px solid rgba(191,202,186,0.2); }
+    .avatar { width: 40px; height: 40px; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; letter-spacing: 0.26px; flex-shrink: 0; }
+    .author-name { font-size: 13px; font-weight: 600; letter-spacing: 0.26px; color: var(--text); }
+    .verified { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.44px; color: var(--primary-deep); }
+    .verified .icon { width: 11px; height: 11px; }
+
+    /* ---------- Payments ---------- */
+    .pay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding-top: 12px; }
+    .pay-card { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 10px; padding: 24px 17px; }
+    .pay-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(156,244,156,0.4); color: var(--primary-text); display: flex; align-items: center; justify-content: center; }
+    .pay-card h3 { font-size: 18px; line-height: 28px; font-weight: 600; letter-spacing: -0.2px; }
+    .pay-card small { font-size: 11px; font-weight: 700; letter-spacing: 0.44px; color: var(--text-muted); }
+    .secure-banner {
+      background: #eeeeeb; border-radius: 16px; padding: 16px;
+      display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;
+    }
+    .secure-banner p { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: var(--text-muted); }
+    .secure-banner .icon { color: var(--primary-dark); }
+
+    /* ---------- CTA ---------- */
+    .cta {
+      position: relative; overflow: hidden; border-radius: 24px; padding: 24px; color: #fff;
+      background: linear-gradient(169deg, #2e7d32 0%, #126d27 100%);
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+      display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;
+    }
+    .cta h2 { font-size: 24px; line-height: 32px; font-weight: 700; letter-spacing: -0.36px; }
+    .cta p { font-size: 16px; line-height: 24px; color: rgba(255,255,255,0.9); max-width: 512px; }
+    .cta-buttons { display: flex; flex-direction: column; gap: 12px; width: 100%; padding-top: 12px; }
+    .cta-buttons .btn { width: 100%; }
+
+    /* ---------- Get in touch form (added) ---------- */
+    .form-card { padding: 24px; display: flex; flex-direction: column; gap: 18px; max-width: 560px; width: 100%; margin: 0 auto; }
+    .form-card h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; text-align: center; }
+    .form-card > p { text-align: center; font-size: 14px; color: var(--text-muted); margin-top: -10px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 13px; font-weight: 600; color: var(--text); }
+    .field input {
+      width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(191,202,186,0.8);
+      background: #fff; font: inherit; font-size: 15px; color: var(--text); outline: none; transition: border-color .15s, box-shadow .15s;
+    }
+    .field input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(46,125,50,0.15); }
+    .form-status { min-height: 22px; text-align: center; font-size: 14px; font-weight: 600; }
+    .form-status.success { color: var(--primary-dark); }
+    .form-status.error { color: #b3261e; }
+
+    /* ---------- Footer ---------- */
+    footer { background: #e2e3e0; border-top: 1px solid rgba(191,202,186,0.4); margin-top: 40px; }
+    .footer-inner { padding: 32px 16px; display: flex; flex-direction: column; gap: 32px; }
+    .footer-grid { display: grid; grid-template-columns: 1fr; gap: 32px; }
+    .footer-col { display: flex; flex-direction: column; gap: 8px; }
+    .footer-col h4 { font-size: 15px; font-weight: 700; letter-spacing: 0.15px; padding-bottom: 4px; }
+    .footer-col a { font-size: 14px; color: var(--text-muted); }
+    .footer-col a:hover { color: var(--primary-dark); }
+    .footer-intro p { font-size: 14px; line-height: 20px; color: var(--text-muted); }
+    .social { display: flex; gap: 12px; padding-top: 8px; }
+    .social a { width: 36px; height: 36px; border-radius: 9999px; background: #f4f4f1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
+    .social a:hover { color: var(--primary-dark); }
+    .social .icon { width: 15px; height: 15px; }
+    .contact-line { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; color: var(--text-muted); }
+    .contact-line .icon { width: 14px; height: 14px; margin-top: 3px; color: var(--primary-dark); }
+    .footer-bottom { border-top: 1px solid var(--border); padding-top: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .footer-legal { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+    .footer-legal a { font-size: 14px; color: var(--text-muted); }
+    .copyright { font-size: 14px; color: var(--text-muted); }
+
+    /* ---------- Mobile bottom nav ---------- */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 40; display: flex; justify-content: space-around; align-items: center;
+      background: rgba(249,249,246,0.95); backdrop-filter: blur(6px); border-top: 1px solid var(--border);
+      padding: 8px 16px 9px; box-shadow: 0 -10px 15px -3px rgba(0,0,0,0.1), 0 -4px 6px -4px rgba(0,0,0,0.1);
+    }
+    .bottom-nav a { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.44px; color: var(--text-muted); border-radius: 9999px; }
+    .bottom-nav a.active { background: var(--primary); color: #cbffc2; }
+    .bottom-nav .icon { width: 18px; height: 18px; }
+    .bottom-nav .dot { position: absolute; top: 0; right: 8px; width: 8px; height: 8px; border-radius: 9999px; background: #834600; }
+
+    /* ---------- Responsive ---------- */
+    @media (min-width: 640px) {
+      .hero h1 { font-size: 36px; line-height: 44px; }
+      .hero-media { height: 340px; }
+      .section-head h2 { font-size: 28px; line-height: 36px; }
+      .hero-buttons { flex-wrap: nowrap; }
+      .micro-badges { gap: 4px 12px; }
+    }
+    @media (min-width: 768px) {
+      .container { padding: 0 24px; }
+      .hero { padding: 40px 0 48px; }
+      .hero-grid { display: grid; grid-template-columns: 1fr; gap: 0; }
+      .hero h1 { font-size: 44px; line-height: 52px; letter-spacing: -1px; }
+      .hero-media { height: 360px; margin-top: 40px; }
+      .category-grid { grid-template-columns: 1fr 1fr; }
+      .feature-list { grid-template-columns: 1fr 1fr; }
+      .testimonials { flex-direction: row; }
+      .testimonials > * { flex: 1; }
+      .stats { grid-template-columns: 1fr 1fr; gap: 16px; }
+      .achievement { padding: 40px; }
+      .cta { padding: 40px; }
+      .cta-buttons { flex-direction: row; justify-content: center; }
+      .cta-buttons .btn { width: auto; min-width: 200px; }
+      .footer-grid { grid-template-columns: repeat(4, 1fr); }
+      .footer-bottom { flex-direction: row; justify-content: space-between; align-items: center; }
+      .footer-inner { padding: 40px 24px; }
+      body { padding-bottom: 0; }
+      .bottom-nav { display: none; }
+      .pay-grid { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    }
+    @media (min-width: 1024px) {
+      .hero h1 { font-size: 56px; line-height: 64px; }
+      .hero-grid { grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+      .hero-media { margin-top: 0; height: 440px; }
+      .hero-content .micro-badges { padding-top: 8px; }
+      .category-grid { grid-template-columns: 1fr 1fr 1fr; }
+      .feature-list { grid-template-columns: repeat(3, 1fr); }
+      .stats { grid-template-columns: repeat(4, 1fr); }
+      .section { padding: 56px 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ HEADER (Section: TopAppBar) ============ -->
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="left-cluster">
+        <button class="icon-btn" id="menuBtn" aria-label="Open navigation menu">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <a href="#" class="brand">
+          <svg class="icon" viewBox="0 0 24 24" style="color:var(--primary-dark)"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+          SSM Shop
+        </a>
+      </div>
+      <div class="right-cluster">
+        <button class="icon-btn" aria-label="Search catalog">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+        <button class="icon-btn" aria-label="Shopping cart">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="cart-badge">3</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ DRAWER (Section: NAVIGATION DRAWER) ============ -->
+  <div class="overlay" id="overlay"></div>
+  <aside class="drawer" id="drawer" aria-label="Navigation">
+    <div class="drawer-head">
+      <div class="brand" style="font-size:24px">
+        <svg class="icon" viewBox="0 0 24 24" style="color:var(--primary-dark)"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+        SSM Shop
+      </div>
+      <button class="icon-btn" id="closeBtn" aria-label="Close drawer">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <nav class="drawer-links">
+      <a href="#top" class="drawer-link active">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></svg>
+        Home
+      </a>
+      <a href="#categories" class="drawer-link">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Categories
+      </a>
+      <a href="#deals" class="drawer-link">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        Daily Deals
+      </a>
+      <a href="#orders" class="drawer-link">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/></svg>
+        My Orders
+      </a>
+      <a href="#contact" class="drawer-link">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Help &amp; Support
+      </a>
+    </nav>
+    <div class="drawer-foot">
+      <div class="open-now">
+        <svg class="icon" viewBox="0 0 24 24" style="width:12px;height:12px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Open Today: 7 AM – 10 PM
+      </div>
+      <p>Main Market Road, Near Town Clock</p>
+    </div>
+  </aside>
+
+  <main id="top">
+
+    <!-- ============ HERO (Section 2) ============ -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <span class="trust-pill">
+            <svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px;color:var(--primary-dark)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+            Your Trusted Local Grocery Store
+          </span>
+          <h1>Fresh Groceries.<span>Great Prices.</span></h1>
+          <p class="hero-text">Shop fresh, quality groceries and everyday essentials from your trusted local store. Convenient shopping, fair price.</p>
+          <div class="hero-buttons">
+            <a href="#contact" class="btn btn-primary">
+              Shop Now
+              <svg class="icon" viewBox="0 0 24 24" style="width:12px;height:12px"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            <a href="#categories" class="btn btn-outline">Explore<br>Categories</a>
+          </div>
+          <div class="micro-badges">
+            <span class="micro-badge"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Fresh products</span>
+            <span class="micro-sep">•</span>
+            <span class="micro-badge"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Fair prices</span>
+          </div>
+        </div>
+
+        <!-- Hero image: replace the placeholder background with your photo (Figma asset links expire after 7 days) -->
+        <div class="hero-media" role="img" aria-label="Fresh golden pulses, basmati rice, cold pressed cooking oil and aromatics on a rustic grocer table">
+          <svg class="hero-trad" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <defs>
+              <radialGradient id="tradBg" cx="50%" cy="45%" r="70%">
+                <stop offset="0" stop-color="#fbf3df"/>
+                <stop offset="1" stop-color="#e9cf9c"/>
+              </radialGradient>
+            </defs>
+            <rect width="600" height="400" fill="url(#tradBg)"/>
+
+            <!-- faint sunburst rays -->
+            <g stroke="#e4c48a" stroke-width="2" opacity="0.6">
+              <line x1="300" y1="200" x2="0" y2="0"/>
+              <line x1="300" y1="200" x2="600" y2="0"/>
+              <line x1="300" y1="200" x2="0" y2="400"/>
+              <line x1="300" y1="200" x2="600" y2="400"/>
+              <line x1="300" y1="200" x2="300" y2="0"/>
+              <line x1="300" y1="200" x2="300" y2="400"/>
+              <line x1="300" y1="200" x2="0" y2="200"/>
+              <line x1="300" y1="200" x2="600" y2="200"/>
+            </g>
+
+            <!-- marigold garland -->
+            <path d="M0 30 Q150 70 300 30 Q450 -10 600 30" stroke="#2e7d32" stroke-width="5" fill="none"/>
+            <g fill="#f4a300" stroke="#c77800" stroke-width="1">
+              <circle cx="60" cy="52" r="9"/>
+              <circle cx="120" cy="60" r="9"/>
+              <circle cx="180" cy="56" r="9"/>
+              <circle cx="240" cy="44" r="9"/>
+              <circle cx="360" cy="44" r="9"/>
+              <circle cx="420" cy="56" r="9"/>
+              <circle cx="480" cy="60" r="9"/>
+              <circle cx="540" cy="52" r="9"/>
+            </g>
+
+            <!-- ornamental border -->
+            <rect x="12" y="12" width="576" height="376" fill="none" stroke="#8a2d1f" stroke-width="3"/>
+            <rect x="20" y="20" width="560" height="360" fill="none" stroke="#c9a04a" stroke-width="1.5"/>
+
+            <!-- brass lota (left) -->
+            <path d="M70 250 Q70 330 110 335 Q150 330 150 250 Z" fill="#c9962e"/>
+            <rect x="82" y="215" width="56" height="40" rx="8" fill="#d9a441"/>
+            <ellipse cx="110" cy="215" rx="28" ry="6" fill="#e8b85a"/>
+            <path d="M92 262 Q92 300 100 318" stroke="#f0cd7a" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+            <!-- grain jars (right) -->
+            <rect x="446" y="240" width="78" height="14" rx="4" fill="#8a2d1f"/>
+            <rect x="450" y="252" width="70" height="88" rx="10" fill="#f6f1e4" stroke="#8a2d1f" stroke-width="2"/>
+            <rect x="456" y="285" width="58" height="50" rx="6" fill="#f6c24f"/>
+            <rect x="516" y="262" width="60" height="78" rx="10" fill="#f6f1e4" stroke="#8a2d1f" stroke-width="2"/>
+            <rect x="521" y="290" width="50" height="46" rx="6" fill="#fffdf6"/>
+
+            <!-- diyas -->
+            <path d="M176 352 Q196 372 216 352 Z" fill="#b5651d"/>
+            <path d="M196 332 Q203 344 196 350 Q189 344 196 332 Z" fill="#ffb300"/>
+            <path d="M384 352 Q404 372 424 352 Z" fill="#b5651d"/>
+            <path d="M404 332 Q411 344 404 350 Q397 344 404 332 Z" fill="#ffb300"/>
+
+            <!-- SSM logo emblem -->
+            <g transform="translate(300,190)">
+              <circle r="92" fill="#8a2d1f"/>
+              <circle r="82" fill="none" stroke="#e0b25a" stroke-width="3"/>
+              <path id="arcTop" d="M-74 0 A74 74 0 0 1 74 0" fill="none"/>
+              <text font-family="Georgia, 'Times New Roman', serif" font-size="11" letter-spacing="3" fill="#fbf3df">
+                <textPath href="#arcTop" startOffset="50%" text-anchor="middle">GROCERY · FRESH · TRADITION</textPath>
+              </text>
+              <circle r="66" fill="#fbf3df"/>
+              <circle r="58" fill="none" stroke="#8a2d1f" stroke-width="1.5" stroke-dasharray="3 4"/>
+              <text y="14" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="50" font-weight="700" fill="#8a2d1f" letter-spacing="2">SSM</text>
+              <text y="38" text-anchor="middle" font-family="Georgia, serif" font-size="12" letter-spacing="5" fill="#2e7d32">SHOP</text>
+              <path d="M-6 -70 L0 -78 L6 -70 L0 -62 Z" fill="#e0b25a"/>
+              <path d="M-6 70 L0 78 L6 70 L0 62 Z" fill="#e0b25a"/>
+              <path d="M-70 -6 L-78 0 L-70 6 L-62 0 Z" fill="#e0b25a"/>
+              <path d="M70 -6 L78 0 L70 6 L62 0 Z" fill="#e0b25a"/>
+            </g>
+            <defs>
+              <linearGradient id="heroBg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#f8f1e3"/>
+                <stop offset="1" stop-color="#e7d5b2"/>
+              </linearGradient>
+            </defs>
+            <rect width="600" height="400" fill="url(#heroBg)"/>
+            <!-- leaves -->
+            <path d="M30 120 Q70 75 115 120 Q70 150 30 120 Z" fill="#4caf50"/>
+            <path d="M30 120 L95 120" stroke="#2e7d32" stroke-width="2"/>
+            <path d="M520 70 Q565 30 585 75 Q548 100 520 70 Z" fill="#66bb6a"/>
+            <!-- table -->
+            <rect y="300" width="600" height="100" fill="#b08650"/>
+            <rect y="300" width="600" height="8" fill="#8f6a3c"/>
+            <!-- rice bowl -->
+            <path d="M70 232 Q150 322 230 232 Z" fill="#c8733a"/>
+            <path d="M78 234 Q150 168 222 234 Z" fill="#fffdf6"/>
+            <g fill="#eadfbf">
+              <ellipse cx="110" cy="222" rx="6" ry="2.5"/>
+              <ellipse cx="140" cy="206" rx="6" ry="2.5"/>
+              <ellipse cx="170" cy="210" rx="6" ry="2.5"/>
+              <ellipse cx="195" cy="224" rx="6" ry="2.5"/>
+              <ellipse cx="125" cy="230" rx="6" ry="2.5"/>
+              <ellipse cx="160" cy="226" rx="6" ry="2.5"/>
+            </g>
+            <!-- dal bowl -->
+            <path d="M300 248 Q360 332 420 248 Z" fill="#e8a33d"/>
+            <path d="M306 248 Q360 214 414 248 Z" fill="#f6c24f"/>
+            <g fill="#e09a2a">
+              <circle cx="340" cy="240" r="3"/>
+              <circle cx="360" cy="236" r="3"/>
+              <circle cx="380" cy="242" r="3"/>
+            </g>
+            <!-- oil bottle -->
+            <rect x="472" y="150" width="50" height="150" rx="10" fill="#c99a2e"/>
+            <rect x="484" y="118" width="26" height="36" rx="3" fill="#2e7d32"/>
+            <rect x="478" y="192" width="38" height="52" rx="4" fill="#fff8e6"/>
+            <rect x="486" y="206" width="22" height="4" fill="#c99a2e"/>
+            <rect x="486" y="216" width="16" height="3" fill="#c99a2e"/>
+            <!-- spice / pulse scatter -->
+            <circle cx="250" cy="330" r="5" fill="#d9822b"/>
+            <circle cx="270" cy="345" r="4" fill="#f6c24f"/>
+            <circle cx="235" cy="352" r="4" fill="#8d5a2b"/>
+            <circle cx="520" cy="330" r="4" fill="#e8a33d"/>
+            <circle cx="545" cy="350" r="5" fill="#f6c24f"/>
+          </svg>
+          <div class="float-card one">
+            <div class="dot">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg>
+            </div>
+            <div>
+              <div class="label">Certified Store</div>
+              <div class="value">⭐ Fresh &amp; Quality</div>
+            </div>
+          </div>
+          <div class="float-card two">
+            <div class="dot">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/></svg>
+            </div>
+            <div>
+              <div class="label">Guaranteed Value</div>
+              <div class="value">🏷️ Best Everyday Prices</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CATEGORIES (Section 3) ============ -->
+    <section class="section" id="categories">
+      <div class="container stack">
+        <div class="section-head">
+          <span class="eyebrow">Aisles &amp; Shelves</span>
+          <h2>Everything You Need, All in One Place</h2>
+          <p>Explore our popular grocery categories and find your everyday essentials.</p>
+        </div>
+
+        <div class="category-grid">
+          <article class="card category">
+            <div class="category-icon">
+              <svg class="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="13" rx="8" ry="6"/><path d="M8 8c1-2 3-3 4-3s3 1 4 3"/></svg>
+            </div>
+            <span class="badge">From ₹65/kg</span>
+            <h3>Fresh Rice</h3>
+            <p>Premium basmati, sona masoori &amp; organic grains.</p>
+            <a href="#" class="explore">Explore <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+          </article>
+
+          <article class="card category">
+            <div class="category-icon peach">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 2c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11Z"/></svg>
+            </div>
+            <span class="badge">Unpolished</span>
+            <h3>Fresh Dal &amp; Pulses</h3>
+            <p>Toor, moong, chana &amp; organic lentils.</p>
+            <a href="#" class="explore">Explore <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+          </article>
+
+          <article class="card category">
+            <div class="category-icon neutral">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M2 12c3 0 4-2 6-2s3 2 6 2 4-2 6-2"/><path d="M2 17c3 0 4-2 6-2s3 2 6 2 4-2 6-2"/></svg>
+            </div>
+            <span class="badge">Farm Fresh</span>
+            <h3>Whole Grains</h3>
+            <p>Wheat, millet, oats &amp; wholesome flour.</p>
+            <a href="#" class="explore">Explore <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+          </article>
+
+          <article class="card category">
+            <div class="category-icon">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 3c-3 0-6 4-6 8a6 6 0 0 0 12 0c0-4-3-8-6-8Z"/></svg>
+            </div>
+            <span class="badge">Daily Care</span>
+            <h3>Soaps &amp; Hygiene</h3>
+            <p>Handwashes, bath soaps &amp; detergent care.</p>
+            <a href="#" class="explore">Explore <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+          </article>
+
+          <article class="card category">
+            <div class="category-icon neutral">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M3 11h18l-2 9H5l-2-9Z"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            </div>
+            <span class="badge">Kitchen &amp; Home</span>
+            <h3>House Essentials</h3>
+            <p>Cleaning supplies, kitchen tissue &amp; foil.</p>
+            <a href="#" class="explore">Explore <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+          </article>
+
+          <article class="card category">
+            <div class="category-icon peach">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M8 3h8l-1 6h-6Z"/><path d="M7 9h10v11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1Z"/></svg>
+            </div>
+            <span class="badge">Cold Pressed</span>
+            <h3>Cooking Oils &amp; Ghee</h3>
+            <p>Mustard, sunflower &amp; pure desi ghee.</p>
+            <a href="#" class="explore">Explore <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ WHY SHOP WITH US (Section 4) ============ -->
+    <section class="section">
+      <div class="container stack">
+        <div class="section-head">
+          <span class="eyebrow">Our Promise</span>
+          <h2>Why Shop With Us?</h2>
+          <p>We make everyday grocery shopping simple, fresh, and convenient.</p>
+        </div>
+
+        <div class="feature-list">
+          <div class="card feature">
+            <div class="feature-icon">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg>
+            </div>
+            <h3>Fresh &amp; Quality</h3>
+            <p>Carefully selected products to bring pure freshness to your home.</p>
+          </div>
+          <div class="card feature">
+            <div class="feature-icon">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            </div>
+            <h3>Fair Prices</h3>
+            <p>Great everyday prices without compromising on quality or hygiene.</p>
+          </div>
+          <div class="card feature">
+            <div class="feature-icon">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+            </div>
+            <h3>Trusted Local Store</h3>
+            <p>Serving our local community with pride, care and utmost reliability.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ACHIEVEMENTS (Section 5) ============ -->
+    <section class="section">
+      <div class="container">
+        <div class="achievement">
+          <div class="section-head">
+            <span class="pill">Community Milestones</span>
+            <h2>Trusted by Our Local Community</h2>
+            <p>We're proud to serve our customers with quality products and reliable service every day.</p>
+          </div>
+          <div class="stats">
+            <div class="stat"><strong>10+</strong><span>Years of Service</span></div>
+            <div class="stat"><strong>5,000+</strong><span>Happy Customers</span></div>
+            <div class="stat"><strong>500+</strong><span>Quality Products</span></div>
+            <div class="stat"><strong>99.8%</strong><span>On-Time Delivery</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TESTIMONIALS (Section 6) ============ -->
+    <section class="section">
+      <div class="container stack">
+        <div class="section-head">
+          <span class="eyebrow">Real Stories</span>
+          <h2>What Our Customers Say</h2>
+          <p>Your satisfaction is what keeps us going.</p>
+        </div>
+
+        <div class="testimonials">
+          <div class="card testimonial">
+            <div>
+              <div class="stars">
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+              <p class="quote" style="margin-top:12px">"Fresh products, reasonable prices, and very friendly service. This has become my go-to grocery store."</p>
+            </div>
+            <div class="author">
+              <div class="avatar" style="background:var(--primary-soft);color:var(--primary-text)">PS</div>
+              <div>
+                <div class="author-name">Priya S.</div>
+                <div class="verified"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Verified Customer</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card testimonial">
+            <div>
+              <div class="stars">
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+              <p class="quote" style="margin-top:12px">"The pulses and rice are always top quality and the delivery is super quick. Very convenient for our family."</p>
+            </div>
+            <div class="author">
+              <div class="avatar" style="background:var(--accent);color:#2e1500">RK</div>
+              <div>
+                <div class="author-name">Rahul K.</div>
+                <div class="verified"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Verified Customer</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card testimonial">
+            <div>
+              <div class="stars">
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+              <p class="quote" style="margin-top:12px">"Great variety of products and excellent customer service. Honest local shop that never compromises."</p>
+            </div>
+            <div class="author">
+              <div class="avatar" style="background:#e8e8e5;color:var(--text)">AM</div>
+              <div>
+                <div class="author-name">Anita M.</div>
+                <div class="verified"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Verified Customer</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PAYMENTS (Section 7) ============ -->
+    <section class="section">
+      <div class="container stack" style="gap:20px">
+        <div class="section-head">
+          <span class="eyebrow">Simple Checkout</span>
+          <h2>Shop Easily. Pay Your Way.</h2>
+          <p>Choose the payment method that's most convenient for you.</p>
+        </div>
+
+        <div class="pay-grid">
+          <div class="card pay-card">
+            <div class="pay-icon">
+              <svg class="icon" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+            </div>
+            <h3>UPI</h3>
+            <small>Google Pay, PhonePe, Paytm</small>
+          </div>
+          <div class="card pay-card">
+            <div class="pay-icon">
+              <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </div>
+            <h3>Credit / Debit Card</h3>
+            <small>Visa, RuPay, Mastercard</small>
+          </div>
+          <div class="card pay-card">
+            <div class="pay-icon">
+              <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>
+            </div>
+            <h3>Cash on Delivery</h3>
+            <small>Pay at your doorstep</small>
+          </div>
+          <div class="card pay-card">
+            <div class="pay-icon">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-3 7 3"/><line x1="4" y1="10" x2="4" y2="21"/><line x1="20" y1="10" x2="20" y2="21"/></svg>
+            </div>
+            <h3>Online Net Banking</h3>
+            <small>All major banks supported</small>
+          </div>
+        </div>
+
+        <div class="secure-banner">
+          <p>
+            <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Safe and secure payment options for a 100% worry-free shopping experience.
+          </p>
+          <a href="#contact" class="btn btn-primary" style="padding:10px 20px;min-height:auto;font-size:13px;letter-spacing:0.26px">Start Shopping Now</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CTA (Section 8) ============ -->
+    <section class="section">
+      <div class="container">
+        <div class="cta">
+          <svg class="icon" viewBox="0 0 24 24" style="width:34px;height:34px;color:#fff"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <h2>Ready to Fill Your Basket?</h2>
+          <p>Get fresh groceries and everyday essentials delivered to your doorstep.</p>
+          <div class="cta-buttons">
+            <a href="#contact" class="btn btn-accent">Order Now</a>
+            <a href="#contact" class="btn btn-ghost">Contact Us</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ GET IN TOUCH FORM (added: form section, 3 fields only) ============ -->
+    <section class="section" id="contact">
+      <div class="container">
+        <div class="card form-card">
+          <h2>Get in Touch</h2>
+          <p>Leave your details and we'll get back to you.</p>
+
+          <form id="contactForm" novalidate>
+            <div class="field">
+              <label for="name">Name</label>
+              <input type="text" id="name" name="name" placeholder="Your full name" autocomplete="name" required />
+            </div>
+            <div class="field" style="margin-top:14px">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required />
+            </div>
+            <div class="field" style="margin-top:14px">
+              <label for="phone">Phone</label>
+              <input type="tel" id="phone" name="phone" placeholder="+91 98765 43210" autocomplete="tel" required />
+            </div>
+            <button type="submit" class="btn btn-primary" id="submitBtn" style="width:100%;margin-top:18px">Submit</button>
+          </form>
+
+          <div class="form-status" id="formStatus" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ FOOTER (Section 9) ============ -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-grid">
+          <div class="footer-col footer-intro">
+            <a href="#top" class="brand" style="font-size:20px">
+              <svg class="icon" viewBox="0 0 24 24" style="color:var(--primary-dark)"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+              SSM Shop
+            </a>
+            <p>Your trusted local grocery store for fresh products, fair prices, and convenient shopping.</p>
+            <div class="social">
+              <a href="#" aria-label="Social"><svg class="icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/></svg></a>
+              <a href="#" aria-label="Chat"><svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg></a>
+              <a href="#" aria-label="Location"><svg class="icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg></a>
+            </div>
+          </div>
+
+          <div class="footer-col">
+            <h4>Quick Links</h4>
+            <a href="#top">Home</a>
+            <a href="#categories">Categories</a>
+            <a href="#promise">Why Choose Us</a>
+            <a href="#testimonials">Reviews</a>
+            <a href="#contact">Contact</a>
+          </div>
+
+          <div class="footer-col">
+            <h4>Categories</h4>
+            <a href="#categories">Rice &amp; Grains</a>
+            <a href="#categories">Dal &amp; Pulses</a>
+            <a href="#categories">Daily Essentials</a>
+            <a href="#categories">Spices &amp; Oils</a>
+          </div>
+
+          <div class="footer-col">
+            <h4>Store Details</h4>
+            <div class="contact-line">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
+              <span>+91 98765 43210</span>
+            </div>
+            <div class="contact-line">
+              <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22 6 12 13 2 6"/></svg>
+              <span>hello@ssmshop.local</span>
+            </div>
+            <div class="contact-line">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>Main Market Road, Near Town Clock</span>
+            </div>
+            <div class="contact-line">
+              <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>7:00 AM - 10:00 PM Daily</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <div class="footer-legal">
+            <a href="#">About Us</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Store Locations</a>
+            <a href="#contact">Contact Us</a>
+          </div>
+          <p class="copyright">© 2024 SSM Shop. All rights reserved. Fresh Groceries &amp; Household Essentials.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============ MOBILE BOTTOM NAV (shown below 768px) ============ -->
+  <nav class="bottom-nav" aria-label="Mobile navigation">
+    <a href="#top" class="active">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></svg>
+      Home
+    </a>
+    <a href="#categories">
+      <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Categories
+    </a>
+    <a href="#contact">
+      <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Search
+    </a>
+    <a href="#contact">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      Cart
+      <span class="dot"></span>
+    </a>
+  </nav>
+
+  <script>
+    /* ---------- Drawer ---------- */
+    const drawer = document.getElementById("drawer");
+    const overlay = document.getElementById("overlay");
+    function openDrawer() { drawer.classList.add("open"); overlay.classList.add("open"); }
+    function closeDrawer() { drawer.classList.remove("open"); overlay.classList.remove("open"); }
+    document.getElementById("menuBtn").addEventListener("click", openDrawer);
+    document.getElementById("closeBtn").addEventListener("click", closeDrawer);
+    overlay.addEventListener("click", closeDrawer);
+    drawer.querySelectorAll("a").forEach(a => a.addEventListener("click", closeDrawer));
+
+    /* ---------- Form -> Google Apps Script ---------- */
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwq07J3SI7VEu4W9w0fIqMhXTrbIkXJVvMOkD3GdNg0Pk7gF4EmBSZzAYU6td7IGyZG/exec";
+
+    const form = document.getElementById("contactForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const statusEl = document.getElementById("formStatus");
+
+    function showSuccess() {
+      statusEl.className = "form-status success";
+      statusEl.textContent = "Thank you! Your details have been saved.";
+      form.reset();
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit";
+    }
+
+    function showError() {
+      statusEl.className = "form-status error";
+      statusEl.textContent = "Something went wrong. Please try again.";
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit";
+    }
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+
+      if (!name || !email || !phone) {
+        statusEl.className = "form-status error";
+        statusEl.textContent = "Please fill in all fields.";
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending...";
+      statusEl.textContent = "";
+
+      const url = SCRIPT_URL + "?" + new URLSearchParams({ name, email, phone });
+
+      fetch(url, { method: "GET", mode: "no-cors" })
+        .then(() => showSuccess())
+        .catch(() => showError());
+    });
+  </script>
+</body>
+</html>
